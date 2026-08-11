@@ -27,7 +27,7 @@ Agents can rewrite an original social post or a reply in a supplied voice withou
 1. Validate inputs locally and extract exact factual anchors: URLs, mentions, hashtags, and numeric tokens.
 2. Send the source, voice material, facts, context, and constraints as data to a high-reasoning Gemini rewrite call using a strict JSON response schema.
 3. Reject locally invalid output. Retry the rewrite once only when the response is malformed or violates a deterministic limit or anchor.
-4. Send the accepted candidate and all source material to a separate high-reasoning Gemini audit call.
+4. Send the accepted candidate, source text, facts, and context to a separate high-reasoning Gemini audit call. Voice-only material is omitted because it is irrelevant to factual and meaning fidelity.
 5. Return the candidate only when the audit reports preserved meaning with no unsupported, removed, or contradictory claims and local checks still pass.
 
 ## Failure behavior
@@ -40,8 +40,8 @@ Agents can rewrite an original social post or a reply in a supplied voice withou
 
 ## Security and privacy
 
-- The API key is read only from `GEMINI_API_KEY`; there is no CLI key flag that could leak through shell history.
-- Voice profiles, examples, source text, facts, and context are sent to Gemini and are never persisted or telemetered by this tool.
+- The CLI reads the API key only from `GEMINI_API_KEY`; there is no key flag that could leak through shell history. Library callers may pass a key directly in process memory.
+- Voice profiles, examples, source text, facts, and context are sent to Gemini. This tool adds no persistence, logging, or telemetry.
 - Source material is serialized as data. The system instruction tells the model not to execute instructions embedded in content or examples.
 - Profanity is preserved when it belongs to the source or supplied voice; it is not treated as a reason to sanitize the rewrite.
 

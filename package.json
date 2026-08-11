@@ -1,0 +1,51 @@
+{
+  "name": "voice-rewriter",
+  "version": "0.1.0",
+  "description": "Rewrite social posts and replies in a supplied voice with Gemini, then fail closed on factual or meaning drift.",
+  "type": "module",
+  "bin": {
+    "voice-rewriter": "dist/cli.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "clean": "rm -rf dist",
+    "test": "node --test \"src/**/*.test.ts\"",
+    "test:e2e": "npm run build && node --test test/cli.e2e.test.ts",
+    "test:live": "node --test test/live.test.ts",
+    "typecheck": "tsc --noEmit",
+    "lint": "npm run typecheck && npm test && npm run test:e2e",
+    "prepack": "npm run clean && npm run build"
+  },
+  "keywords": [
+    "gemini",
+    "social-media",
+    "writing",
+    "voice",
+    "cli",
+    "agents"
+  ],
+  "author": "TheChosenVictor LLC",
+  "license": "MIT",
+  "dependencies": {
+    "@google/genai": "^2.16.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.13.3",
+    "typescript": "^7.0.2"
+  }
+}

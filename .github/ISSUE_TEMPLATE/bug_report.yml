@@ -1,0 +1,33 @@
+name: Bug report
+description: Report a reproducible voice-rewriter defect.
+title: "[Bug]: "
+labels: [bug]
+body:
+  - type: textarea
+    id: behavior
+    attributes:
+      label: Observed behavior
+      description: Describe the failure without including an API key or private voice content.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Minimal reproduction
+      description: Include the command, sanitized input shape, exit code, and safe error text.
+    validations:
+      required: true
+  - type: input
+    id: versions
+    attributes:
+      label: Versions
+      description: Include voice-rewriter and Node.js versions.
+    validations:
+      required: true
+  - type: checkboxes
+    id: secret-check
+    attributes:
+      label: Secret check
+      options:
+        - label: I removed API keys and private voice or social content.
+          required: true

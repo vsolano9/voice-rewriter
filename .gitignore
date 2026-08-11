@@ -1,0 +1,6 @@
+.worktrees/
+node_modules/
+dist/
+*.tgz
+.env
+.DS_Store

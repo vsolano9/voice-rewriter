@@ -39,10 +39,18 @@
     "cli",
     "agents"
   ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vsolano9/voice-rewriter.git"
+  },
+  "homepage": "https://github.com/vsolano9/voice-rewriter#readme",
+  "bugs": {
+    "url": "https://github.com/vsolano9/voice-rewriter/issues"
+  },
   "author": "TheChosenVictor LLC",
   "license": "MIT",
   "dependencies": {
-    "@google/genai": "^2.16.0"
+    "@google/genai": "^2.18.0"
   },
   "devDependencies": {
     "@types/node": "^24.13.3",

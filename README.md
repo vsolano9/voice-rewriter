@@ -13,18 +13,22 @@ Voice profiles, examples, source text, facts, and context are sent to Gemini. `v
 
 ## Install
 
-Until the package is published, install it from a checkout:
+Install the CLI globally:
 
 ```bash
-npm ci
-npm run build
-npm link
+npm install --global voice-rewriter
 ```
 
-Confirm the executable:
+Or run it without a permanent install:
 
 ```bash
-voice-rewriter --version
+npx voice-rewriter --version
+```
+
+For the library API, add it to your project:
+
+```bash
+npm install voice-rewriter
 ```
 
 ## Quick start

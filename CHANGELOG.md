@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.1.0 - 2026-08-11
+## 0.1.0 - 2026-08-23
 
 ### Added
 
@@ -9,3 +9,4 @@
 - Fixed `gemini-flash-latest` integration with `HIGH` reasoning.
 - Bounded rewrite retry, exact-anchor checks, and a separate fail-closed semantic audit.
 - Stable exit codes and secret-safe errors.
+- Initial public npm and GitHub release, validated against `@google/genai` 2.18.0.

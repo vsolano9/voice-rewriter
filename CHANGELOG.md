@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.1.1 - 2026-08-24
+
+### Changed
+
+- `homepage` now points at https://thechosenvictor.com/open-source, which
+  documents this package, rather than back at this README. No behaviour change.
+- Added a Maintainer section to the README.
+
 ## 0.1.0 - 2026-08-23
 
 ### Added

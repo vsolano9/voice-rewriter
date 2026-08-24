@@ -144,6 +144,10 @@ npm pack --dry-run
 
 The architecture decision and full test plan are in [ADR-001](docs/decisions/001-cli-library-and-fail-closed-audit.md) and the [implementation plan](docs/plans/2026-08-11-gemini-voice-rewriter-implementation.md).
 
+## Maintainer
+
+`voice-rewriter` is built and maintained by [Victor Solano](https://thechosenvictor.com/open-source).
+
 ## License
 
 MIT. See [LICENSE](LICENSE).

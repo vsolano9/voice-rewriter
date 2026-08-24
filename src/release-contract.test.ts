@@ -17,7 +17,11 @@ test("package metadata points consumers to the public owner repository", async (
     type: "git",
     url: "git+https://github.com/vsolano9/voice-rewriter.git",
   });
-  assert.equal(packageJson.homepage, "https://github.com/vsolano9/voice-rewriter#readme");
+  // `homepage` is the project page, not this README. `repository` and `bugs`
+  // still carry consumers to the source and the issue tracker, which is what
+  // this test guards; the homepage field is where npm sends someone who wants
+  // to know what the package is for.
+  assert.equal(packageJson.homepage, "https://thechosenvictor.com/open-source");
   assert.deepEqual(packageJson.bugs, {
     url: "https://github.com/vsolano9/voice-rewriter/issues",
   });

@@ -1,6 +1,6 @@
 {
   "name": "voice-rewriter",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Rewrite social posts and replies in a supplied voice with Gemini, then fail closed on factual or meaning drift.",
   "type": "module",
   "bin": {
@@ -43,7 +43,7 @@
     "type": "git",
     "url": "git+https://github.com/vsolano9/voice-rewriter.git"
   },
-  "homepage": "https://github.com/vsolano9/voice-rewriter#readme",
+  "homepage": "https://thechosenvictor.com/open-source",
   "bugs": {
     "url": "https://github.com/vsolano9/voice-rewriter/issues"
   },

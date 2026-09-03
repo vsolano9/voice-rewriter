@@ -87,6 +87,7 @@ If source text is omitted, the CLI reads stdin.
 | `--context <file>` | Parent post or conversation context. |
 | `--max-chars <count>` | Maximum output length in user-perceived characters. |
 | `--json` | Print the successful result or error as JSON. |
+| `--no-color` | Disable ANSI color. Also honors `NO_COLOR`. |
 | `--` | Treat every remaining argument as source text, including option-like text. |
 | `--help` | Show command help. |
 | `--version` | Show the installed version. |
@@ -143,6 +144,10 @@ npm pack --dry-run
 ```
 
 The architecture decision and full test plan are in [ADR-001](docs/decisions/001-cli-library-and-fail-closed-audit.md) and the [implementation plan](docs/plans/2026-08-11-gemini-voice-rewriter-implementation.md).
+
+## Design
+
+[`DESIGN.md`](DESIGN.md) is the terminal visual system: the ANSI roles, when color is allowed, and what stays plain so pipes copy clean text. `src/colors.generated.ts` is generated from it (`designmd export`); edit `DESIGN.md` and re-export instead of editing the file. Color is off whenever `NO_COLOR` is set or `--no-color` is passed, and the rewrite body on stdout is never colored.
 
 ## Maintainer
 

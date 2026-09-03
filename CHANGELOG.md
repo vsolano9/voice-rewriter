@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+- `DESIGN.md` terminal visual system and the generated `src/colors.generated.ts` ANSI roles.
+- Colored usage line, `✓ audit pass` stamp on stderr, and colored errors; `--no-color` flag and `NO_COLOR` disable color and fall back to ASCII `+`/`x` glyphs. The rewrite on stdout is never colored.
+
 ## 0.1.1 - 2026-08-24
 
 ### Changed

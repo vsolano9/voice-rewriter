@@ -1,3 +1,4 @@
+import { paint, type Role } from "./colors.generated.ts";
 import {
   ConfigurationError,
   FidelityError,
@@ -20,7 +21,7 @@ export interface CliDependencies {
   version: string;
 }
 
-const HELP = `voice-rewriter --kind <post|reply> --profile <file> [options] [--] ["source text"]
+const HELP = `voice-rewriter --kind <post|reply> --profile <file> [options]
 
 If source text is omitted, voice-rewriter reads it from stdin.
 
@@ -32,11 +33,13 @@ Options:
   --context <file>     Parent post or conversation context.
   --max-chars <count>  Maximum user-perceived characters.
   --json               Print the rewrite and audit as JSON.
+  --no-color           Disable ANSI color (also honors NO_COLOR).
   --                   Treat every remaining argument as source text.
   --help               Show this help.
   --version            Show the installed version.
 
-Set GEMINI_API_KEY in the environment. The tool always uses gemini-flash-latest with HIGH reasoning and a separate fidelity audit.
+Set GEMINI_API_KEY in the environment. The tool always uses
+gemini-flash-latest with HIGH reasoning and a separate fidelity audit.
 `;
 
 interface ParsedArguments {
@@ -62,6 +65,25 @@ function hasOption(args: readonly string[], option: string): boolean {
   const terminatorIndex = args.indexOf("--");
   const optionArguments = terminatorIndex === -1 ? args : args.slice(0, terminatorIndex);
   return optionArguments.includes(option);
+}
+
+function paintRole(text: string, role: Role, args: readonly string[]): string {
+  if (hasOption(args, "--no-color")) return text;
+  return paint(text, role);
+}
+
+function stampGlyph(kind: "ok" | "err", args: readonly string[]): string {
+  if (hasOption(args, "--no-color") || Boolean(process.env.NO_COLOR)) {
+    return kind === "ok" ? "+" : "x";
+  }
+  return kind === "ok" ? "✓" : "✗";
+}
+
+function helpText(args: readonly string[]): string {
+  const newline = HELP.indexOf("\n");
+  const first = newline === -1 ? HELP : HELP.slice(0, newline);
+  const rest = newline === -1 ? "" : HELP.slice(newline);
+  return `${paintRole(first, "info", args)}${rest}`;
 }
 
 function parseArguments(args: readonly string[]): ParsedArguments {
@@ -93,6 +115,8 @@ function parseArguments(args: readonly string[]): ParsedArguments {
       index += 1;
     } else if (argument === "--json") {
       parsed.json = true;
+    } else if (argument === "--no-color") {
+      // Honored by paintRole / stampGlyph; not a parse field.
     } else if (argument === "--") {
       const remaining = args.slice(index + 1);
       if (remaining.length === 0) throw new InputError("Source text is required after --.");
@@ -113,7 +137,7 @@ async function runCliUnchecked(
   args: readonly string[],
   dependencies: CliDependencies,
 ): Promise<CliOutput> {
-  if (hasOption(args, "--help")) return { stdout: HELP, stderr: "", exitCode: 0 };
+  if (hasOption(args, "--help")) return { stdout: helpText(args), stderr: "", exitCode: 0 };
   if (hasOption(args, "--version")) {
     return { stdout: `${dependencies.version}\n`, stderr: "", exitCode: 0 };
   }
@@ -139,16 +163,20 @@ async function runCliUnchecked(
   if (parsed.maxCharacters !== undefined) request.maxCharacters = parsed.maxCharacters;
 
   const result = await dependencies.rewrite(request);
+  if (parsed.json === true) {
+    return { stdout: `${JSON.stringify(result)}\n`, stderr: "", exitCode: 0 };
+  }
   return {
-    stdout: parsed.json === true ? `${JSON.stringify(result)}\n` : `${result.text}\n`,
-    stderr: "",
+    stdout: `${result.text}\n`,
+    stderr: `${paintRole(`${stampGlyph("ok", args)} audit pass`, "success", args)}\n`,
     exitCode: 0,
   };
 }
 
-function errorOutput(error: unknown, json: boolean): CliOutput {
+function errorOutput(error: unknown, json: boolean, args: readonly string[]): CliOutput {
   if (!(error instanceof VoiceRewriterError)) {
-    return { stdout: "", stderr: "Error: voice-rewriter failed unexpectedly.\n", exitCode: 1 };
+    const message = `${stampGlyph("err", args)} Error: voice-rewriter failed unexpectedly.`;
+    return { stdout: "", stderr: `${paintRole(message, "error", args)}\n`, exitCode: 1 };
   }
   const exitCode =
     error instanceof InputError || error instanceof ConfigurationError
@@ -170,7 +198,11 @@ function errorOutput(error: unknown, json: boolean): CliOutput {
       exitCode,
     };
   }
-  return { stdout: "", stderr: `Error: ${error.message}\n`, exitCode };
+  return {
+    stdout: "",
+    stderr: `${paintRole(`${stampGlyph("err", args)} Error: ${error.message}`, "error", args)}\n`,
+    exitCode,
+  };
 }
 
 export async function runCli(
@@ -180,6 +212,6 @@ export async function runCli(
   try {
     return await runCliUnchecked(args, dependencies);
   } catch (error) {
-    return errorOutput(error, hasOption(args, "--json"));
+    return errorOutput(error, hasOption(args, "--json"), args);
   }
 }

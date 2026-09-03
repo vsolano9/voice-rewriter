@@ -28,6 +28,7 @@ test("CLI maps post inputs and voice files to the library request", async () => 
 
   const output = await runCli(
     [
+      "--no-color",
       "--kind",
       "post",
       "--profile",
@@ -61,7 +62,7 @@ test("CLI maps post inputs and voice files to the library request", async () => 
   });
   assert.deepEqual(output, {
     stdout: "Shipped build 12. It works.\n",
-    stderr: "",
+    stderr: "+ audit pass\n",
     exitCode: 0,
   });
 });
@@ -112,6 +113,7 @@ test("CLI help and version do not require content or an API call", async () => {
   assert.match(help.stdout, /voice-rewriter --kind <post\|reply> --profile <file>/);
   assert.match(help.stdout, /--context <file>/);
   assert.match(help.stdout, /GEMINI_API_KEY/);
+  assert.match(help.stdout, /--no-color/);
   assert.deepEqual(version, { stdout: "0.1.0\n", stderr: "", exitCode: 0 });
   assert.equal(rewriteCalls, 0);
 });
@@ -123,7 +125,7 @@ test("CLI maps safe error categories to stable exit codes", async () => {
     version: "0.1.0",
   };
 
-  const usage = await runCli([], { ...base, rewrite: async () => passingResult });
+  const usage = await runCli(["--no-color"], { ...base, rewrite: async () => passingResult });
   const fidelity = await runCli(
     ["--kind", "post", "--profile", "voice.md", "--json", "Source."],
     {
@@ -135,18 +137,21 @@ test("CLI maps safe error categories to stable exit codes", async () => {
       },
     },
   );
-  const generation = await runCli(["--kind", "post", "--profile", "voice.md", "Source."], {
-    ...base,
-    rewrite: async () => {
-      throw new GenerationError("Gemini API request failed.", {
-        cause: new Error("secret-key"),
-      });
+  const generation = await runCli(
+    ["--no-color", "--kind", "post", "--profile", "voice.md", "Source."],
+    {
+      ...base,
+      rewrite: async () => {
+        throw new GenerationError("Gemini API request failed.", {
+          cause: new Error("secret-key"),
+        });
+      },
     },
-  });
+  );
 
   assert.deepEqual(usage, {
     stdout: "",
-    stderr: "Error: --kind is required.\n",
+    stderr: "x Error: --kind is required.\n",
     exitCode: 2,
   });
   assert.equal(fidelity.stdout, "");
@@ -160,7 +165,7 @@ test("CLI maps safe error categories to stable exit codes", async () => {
   });
   assert.deepEqual(generation, {
     stdout: "",
-    stderr: "Error: Gemini API request failed.\n",
+    stderr: "x Error: Gemini API request failed.\n",
     exitCode: 4,
   });
   assert.doesNotMatch(generation.stderr, /secret-key/);
@@ -202,4 +207,42 @@ test("CLI does not interpret help as an option after --", async () => {
 
   assert.equal(output.exitCode, 0);
   assert.equal(source, "--help");
+});
+
+test("CLI Voice Stamp and errors honor color, --no-color, and NO_COLOR", async () => {
+  const base = {
+    readFile: async () => "Direct.",
+    readStdin: async () => "",
+    rewrite: async () => passingResult,
+    version: "0.1.0",
+  };
+  const prev = process.env.NO_COLOR;
+  delete process.env.NO_COLOR;
+  try {
+    const coloredError = await runCli([], base);
+    assert.match(coloredError.stderr, /\u001b\[31m/);
+    assert.match(coloredError.stderr, /✗ Error: --kind is required/);
+    assert.doesNotMatch(coloredError.stderr, /\u001b\[31m.*\u001b\[31m/);
+
+    const coloredOk = await runCli(
+      ["--kind", "post", "--profile", "voice.md", "Source."],
+      base,
+    );
+    assert.equal(coloredOk.stdout, "Shipped build 12. It works.\n");
+    assert.match(coloredOk.stderr, /\u001b\[32m/);
+    assert.match(coloredOk.stderr, /✓ audit pass/);
+    assert.doesNotMatch(coloredOk.stdout, /\u001b\[/);
+
+    const flagged = await runCli(["--no-color"], base);
+    assert.equal(flagged.stderr.includes("\u001b["), false);
+    assert.equal(flagged.stderr, "x Error: --kind is required.\n");
+
+    process.env.NO_COLOR = "1";
+    const envOff = await runCli([], base);
+    assert.equal(envOff.stderr.includes("\u001b["), false);
+    assert.equal(envOff.stderr, "x Error: --kind is required.\n");
+  } finally {
+    if (prev === undefined) delete process.env.NO_COLOR;
+    else process.env.NO_COLOR = prev;
+  }
 });

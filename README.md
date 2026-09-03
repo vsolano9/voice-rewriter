@@ -119,7 +119,8 @@ const result = await rewriteSocial({
 console.log(result.text);
 ```
 
-The library reads `GEMINI_API_KEY` by default. It also accepts `{ apiKey, signal }` as the second argument for applications that own their credential and cancellation lifecycle.
+The library reads `GEMINI_API_KEY` by default. It also accepts `{ apiKey, signal }` as the second argument for applications that own their credential and cancellation lifecycle. `RewriteRequest` fields: required `kind` (`post` | `reply`), `text`, `voiceProfile`; optional `examples`, `facts`, `context`, `maxCharacters`. A successful `RewriteResult` is `{ text, audit, model: "gemini-flash-latest", thinkingLevel: "HIGH" }`. Thrown errors: `InputError` / `ConfigurationError` (CLI exit 2), `FidelityError` (exit 3, no candidate printed), `GenerationError` (exit 4). All extend `VoiceRewriterError`.
+
 
 ## Integrity model
 
@@ -138,7 +139,7 @@ No model-based audit can prove truth. This design catches deterministic drift an
 
 ```bash
 npm ci
-npm run lint
+npm run lint        # typecheck, unit tests, and CLI e2e (`test:e2e`)
 npm run test:live   # runs only when GEMINI_API_KEY is set
 npm pack --dry-run
 ```
